@@ -1,4 +1,4 @@
-# 🔥 App Cortafuego Hilti - Superba
+# 🔥 Cortafuego Superba Suite
 
 Aplicación Web Progresiva (PWA) desarrollada para facilitar el diseño, cuantificación y consulta técnica de soluciones cortafuego Hilti en proyectos de construcción.
 
