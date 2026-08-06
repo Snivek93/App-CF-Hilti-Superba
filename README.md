@@ -6,7 +6,7 @@ Aplicación Web Progresiva (PWA) desarrollada para facilitar el diseño, cuantif
 
 ## 📸 Capturas de pantalla
 
-<img width="630" height="1280" alt="WhatsApp Image 2026-08-06 at 10 16 54 AM" src="https://github.com/user-attachments/assets/b7ac90ac-83ff-4234-91b5-64b903f9a8b1" />
+<img width="315" height="640" alt="WhatsApp Image 2026-08-06 at 10 16 54 AM" src="https://github.com/user-attachments/assets/b7ac90ac-83ff-4234-91b5-64b903f9a8b1" />
 
 <img width="630" height="1280" alt="WhatsApp Image 2026-08-06 at 10 16 55 AM (1)" src="https://github.com/user-attachments/assets/34a2a6e6-d712-4f04-9d7b-17dd05b121a8" />
 
