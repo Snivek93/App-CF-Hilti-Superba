@@ -3,6 +3,27 @@
 Aplicación Web Progresiva (PWA) desarrollada para facilitar el diseño, cuantificación y consulta técnica de soluciones cortafuego Hilti en proyectos de construcción.
 
 ---
+## 🎯 Objetivo
+
+Reducir el tiempo requerido para elaborar diseños y cuantificaciones de sistemas cortafuego, minimizando errores y facilitando el acceso a documentación técnica durante el desarrollo de proyectos.
+
+---
+
+## 🚀 Características
+
+- ✅ Instalable como PWA
+- ✅ Funcionamiento offline
+- ✅ Levantamiento en campo de penetrantes
+- ✅ Levantamiento en campo de juntas
+- ✅ Cálculo automático de materiales
+- ✅ Generación de reportes PDF
+- ✅ Generación de memorias de cálculo
+- ✅ Generación de submittal
+- ✅ Consulta de Sistema UL
+- ✅ Consulta de Fichas Técnicas
+- ✅ Actualización automática mediante Service Worker
+
+---
 
 ## 📸 Capturas de pantalla
 
@@ -24,21 +45,6 @@ Aplicación Web Progresiva (PWA) desarrollada para facilitar el diseño, cuantif
 
 ---
 
-## 🚀 Características
-
-- ✅ Instalable como PWA
-- ✅ Funcionamiento offline
-- ✅ Levantamiento en campo de penetrantes
-- ✅ Levantamiento en campo de juntas
-- ✅ Cálculo automático de materiales
-- ✅ Generación de reportes PDF
-- ✅ Generación de memorias de cálculo
-- ✅ Generación de submittal
-- ✅ Consulta de Sistema UL
-- ✅ Consulta de Fichas Técnicas
-- ✅ Actualización automática mediante Service Worker
-
----
 
 ## 🛠 Tecnologías
 
