@@ -1,0 +1,69 @@
+// ============================================================================
+// constantes.js
+// Vocabulario compartido de toda la app: mensajes de error/aviso, tipos de penetrante (TIPO_*), materiales Hilti (MAT_*), y las tablas de familias/fichas asociadas a cada material.
+// (Parte del proyecto Calculadora Cortafuego Hilti — ver src/app.js para
+// el archivo original sin dividir, y README.md para el mapa completo de módulos.)
+// ============================================================================
+
+const ERR_MATERIAL = "¡ELIJA OTRO MATERIAL HILTI!";
+const ERR_JUICIO = "¡SOLICITE JUICIO DE INGENIERÍA!";
+const MSG_CAMBIAR_1 = "Cambiar material a Pasta FS ONE MAX";
+const MSG_CAMBIAR_2 = "Cambiar material a pasta FS ONE MAX";
+const ERR_COMBUSTIBLE_SELLADOR = "CP606 o CFS SIL GG no aplica para tuberías combustibles!";
+
+const TIPO_TUB_METAL = "Tubería Metal";
+const TIPO_TUB_METAL_AISL = "Tubería Metal Aislado";
+const TIPO_TUB_COBRE_HVAC = "Tubería Cobre Aislado HVAC";
+const TIPO_TUB_EMT = "Tubería EMT";
+const TIPO_TUB_COMB = "Tubería Combustible (PVC, CPVC, PEX, PP-R)";
+const TIPO_TUB_COMB_AISL = "Tubería Combustible Aislada (PVC, CPVC, PEX, PP-R)";
+const TIPO_BANDEJA = "Bandeja de Cables";
+const TIPO_CABLE_ARMADO = "Cable Armado";
+const TIPO_CABLE_REPEN = "Cables en Paso Repenetrable";
+const TIPO_CABLE_SUELTOS = "Cables Sueltos";
+const TIPO_CAJA_UL = "Caja Electromecánica UL";
+const TIPO_DUCTO_RECT = "Ducto Rectangular";
+const TIPO_DUCTO_RECT_AISL = "Ducto Rectangular Aislado";
+const TIPO_DUCTO_RED = "Ducto Redondo";
+const TIPO_DUCTO_RED_AISL = "Ducto Redondo Aislado";
+const TIPO_PASANTE_MULT = "Pasante Múltiple";
+const TIPO_VACIO = "Vacío";
+const TIPO_VIGA_W = "Viga W";
+const TIPO_VIGA_CANAL = "Viga Canal";
+const TIPO_VIGA_TUBO = "Viga Tubo Rectangular";
+
+const MAT_PASTA = "Pasta FS ONE MAX";
+const MAT_CINTA_CON = "Cinta con Collar Metálico CP 648-E/ER";
+const MAT_CINTA_SIN = "Cinta sin Collar Metálico CP 648-E";
+const MAT_PUTTY = "Putty Pad CP 617";
+const MAT_ESPUMA = "Espuma CP 620";
+const MAT_ALMOHADILLA = "Almohadilla CFS-BL";
+const MAT_MANGA = 'Manga CP 653 4"';
+const MAT_MSL_M = 'Paso de cables MSL M 3"x4"';
+const MAT_MSL_L = 'Paso de cables MSL L 6"x4"';
+const MAT_COLLARIN = "Collarín CP 643N/644";
+const MAT_MORTERO = "Mortero CP 637";
+const MAT_CP606 = "Sellador CP 606";
+const MAT_CFS_SIL_GG = "Sellador CFS SIL GG";
+
+// Familias de materiales usadas para verificar que el "Producto Hilti" mostrado en el
+// Resumen refleje lo que realmente se seleccionó en cada fila — no solo el texto
+// genérico de NORMA_APLICACION. Esto es necesario porque varios materiales distintos
+// (Pasta, Sellador CP606, CFS SIL GG, Espuma, Almohadilla, Mortero...) pueden compartir
+// el mismo código de norma en Bandeja de Cables / Pasante Múltiple.
+const FAMILIA_POR_MATERIAL = {
+  [MAT_PASTA]: /pasta|fs one max/i,
+  [MAT_CP606]: /cp\s*606/i,
+  [MAT_CFS_SIL_GG]: /sil\s*gg/i,
+  [MAT_ESPUMA]: /espuma|cp\s*620/i,
+  [MAT_ALMOHADILLA]: /almohadilla|cfs-bl/i,
+  [MAT_MORTERO]: /mortero/i,
+  [MAT_COLLARIN]: /collar[ií]n/i,
+  [MAT_PUTTY]: /putty/i,
+};
+// Alias entre el nombre interno del material y la clave real en PRODUCTO_FICHAS
+// (algunos difieren levemente en redacción).
+const FICHA_ALIAS = {
+  [MAT_CFS_SIL_GG]: "Sellador CFS-S SIL GG",
+  [MAT_COLLARIN]: "Collarín CP643N o CP444",
+};

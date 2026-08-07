@@ -1,7 +1,7 @@
 {
-  "name": "Calculadora Cortafuego Hilti - Superba",
-  "short_name": "Cortafuego Hilti",
-  "description": "Calculadora de sellos cortafuego: sistemas UL, cuantificación de materiales, Memoria de Cálculo, Submittal y Levantamiento en campo.",
+  "name": "Firestop Suite · Superba",
+  "short_name": "Firestop Suite",
+  "description": "Calculadora de sellos cortafuego Hilti: sistemas UL, cuantificación de materiales, Memoria de Cálculo, Submittal y Levantamiento en campo.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
