@@ -113,7 +113,7 @@ header.app-header h1 { font-size: var(--fs-md); margin: 0; font-weight: 600; let
 .header-project-fields { display: flex; gap: 8px; flex-wrap: wrap; }
 .header-project-fields input {
   border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.95); border-radius: var(--radius-sm);
-  padding: 6px 9px; font-size: 13px; color: var(--ink); width: 150px; max-width: 100%;
+  padding: 6px 9px; font-size: 13px; color: #1a1a1a; width: 150px; max-width: 100%;
 }
 .header-project-fields input[type="date"] { width: 130px; }
 .header-actions { margin-left: auto; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; row-gap: 6px; }
@@ -144,7 +144,7 @@ header.app-header h1 { font-size: var(--fs-md); margin: 0; font-weight: 600; let
   font-size: var(--fs-2xs); color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px;
 }
 .cfg-field input {
-  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 9px; font-size: 16px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 9px; font-size: 16px; color: var(--ink); background: var(--surface);
 }
 .config-bar input { width: 100px; max-width: 100%; }
 
@@ -197,6 +197,14 @@ header.app-header h1 { font-size: var(--fs-md); margin: 0; font-weight: 600; let
   /* El botón PDF mantiene su ícono de descarga + el texto "PDF" (no queda solo-ícono) */
   #btn-menu-pdf .btn-label { display: inline; }
   #btn-menu-pdf .icon:first-child { margin-right: 5px; }
+  /* Botón de tema: fijo en la esquina superior derecha del header,
+     fuera del flujo del header-actions para que no empuje los otros botones.
+     El header ya es position: relative (o se le agrega acá). */
+  header.app-header { position: relative; }
+  #btn-tema {
+    position: absolute; top: 10px; right: 10px;
+    z-index: 10; padding: 8px 10px;
+  }
 }
 
 /* ============================================================
@@ -251,7 +259,7 @@ table.calc-table tbody tr:hover { background: #fff7f7; }
 .frac-hint { display: block; font-size: var(--fs-2xs); color: var(--text-muted); text-align: center; margin-top: 1px; line-height: 1.2; }
 .cell-input {
   width: 100%; min-width: 70px; border: 1px solid transparent; border-radius: var(--radius-sm); padding: 5px 6px;
-  font-size: var(--fs-sm); background: var(--grey-1);
+  font-size: var(--fs-sm); background: var(--grey-1); color: var(--ink);
 }
 .cell-input:focus { border-color: var(--hilti-red); background: var(--surface); outline: none; }
 select.cell-input { min-width: 130px; }
@@ -272,7 +280,7 @@ select.cell-input { min-width: 130px; }
 .col-disabled select.cell-input { background: var(--grey-2, #ececec); color: var(--text-muted); opacity: 0.55; cursor: not-allowed; }
 .detalle-col { font-size: var(--fs-2xs); color: var(--text-muted); min-width: 220px; white-space: normal; }
 .calc-filter-bar { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-.calc-filter-bar input[type="text"] { flex: 1; min-width: 200px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: var(--fs-sm); }
+.calc-filter-bar input[type="text"] { flex: 1; min-width: 200px; padding: 7px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: var(--fs-sm); color: var(--ink); background: var(--surface); }
 .calc-filter-bar .filter-count { font-size: var(--fs-xs); color: var(--text-muted); white-space: nowrap; }
 .row-hidden-filter { display: none !important; }
 .qty-stepper { display: inline-flex; align-items: center; gap: 4px; }
@@ -406,7 +414,7 @@ body.modo-levantamiento #levantamiento-fullscreen {
 .lev-field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
 .lev-field-small { flex: 0 0 100px; }
 .lev-field label { font-size: var(--fs-2xs); color: var(--text-muted); font-weight: 600; text-transform: uppercase; }
-.lev-field input { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 16px; }
+.lev-field input { width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 10px; font-size: 16px; color: var(--ink); background: var(--surface); }
 
 .lev-editing-banner {
   display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;
@@ -452,13 +460,13 @@ body.modo-levantamiento #levantamiento-fullscreen {
 .lev-dim-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .lev-dim-row input {
   flex: 1 1 80px; min-width: 0; width: auto; border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 12px 8px; font-size: 16px; text-align: center;
+  padding: 12px 8px; font-size: 16px; text-align: center; color: var(--ink); background: var(--surface);
 }
 .lev-x { color: var(--text-muted); font-size: var(--fs-md); flex-shrink: 0; }
 
 .lev-input-otro {
   margin-top: 8px; width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius);
-  padding: 10px 12px; font-size: 16px;
+  padding: 10px 12px; font-size: 16px; color: var(--ink); background: var(--surface);
 }
 .lev-input-otro-compact { width: 130px; }
 
@@ -492,7 +500,7 @@ body.modo-levantamiento #levantamiento-fullscreen {
   font-size: var(--fs-xs); color: var(--text-muted); font-weight: 500; text-transform: none; letter-spacing: normal;
 }
 .lev-inline-discreto input {
-  width: 90px; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 8px; font-size: 16px;
+  width: 90px; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 8px; font-size: 16px; color: var(--ink); background: var(--surface);
 }
 
 .lev-toggle-group { display: flex; gap: 6px; }
@@ -508,7 +516,7 @@ body.modo-levantamiento #levantamiento-fullscreen {
 .lev-stepper { display: flex; align-items: center; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; max-width: 220px; }
 .lev-stepper button { border: none; background: var(--grey-1); font-size: var(--fs-xl); padding: 10px 18px; cursor: pointer; color: var(--ink); flex-shrink: 0; }
 .lev-stepper button:active { background: var(--grey-2); }
-.lev-stepper input { flex: 1; min-width: 0; border: none; text-align: center; font-size: 16px; font-weight: 600; padding: 10px 4px; }
+.lev-stepper input { flex: 1; min-width: 0; border: none; text-align: center; font-size: 16px; font-weight: 600; padding: 10px 4px; color: var(--ink); background: var(--surface); }
 .lev-stepper-full { max-width: none; flex-wrap: wrap; border: none; overflow: visible; gap: 10px; justify-content: center; }
 .qty-btn-group { display: flex; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; flex-shrink: 0; }
 .qty-btn-group button {
@@ -520,7 +528,7 @@ body.modo-levantamiento #levantamiento-fullscreen {
 .qty-btn-group button:active { background: var(--grey-2); }
 .lev-stepper-full input {
   flex: 0 0 76px; border: 1px solid var(--border); border-radius: var(--radius); text-align: center;
-  font-size: 18px; font-weight: 700; padding: 10px 4px;
+  font-size: 18px; font-weight: 700; padding: 10px 4px; color: var(--ink); background: var(--surface);
 }
 
 .lev-add-btn { width: 100%; padding: 15px; font-size: var(--fs-md); font-weight: 700; margin-bottom: 24px; border-radius: var(--radius); }
@@ -538,7 +546,7 @@ body.modo-levantamiento #levantamiento-fullscreen {
 .lev-recent-nota { font-size: var(--fs-xs); color: var(--text-secondary); font-style: italic; overflow-wrap: break-word; }
 .lev-textarea {
   width: 100%; min-width: 0; border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 12px;
-  font-size: 16px; font-family: inherit; resize: vertical;
+  font-size: 16px; font-family: inherit; resize: vertical; color: var(--ink); background: var(--surface);
 }
 .lev-recent-main span:first-child { overflow-wrap: break-word; }
 .lev-recent-actions { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }

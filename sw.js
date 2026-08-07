@@ -10,7 +10,7 @@
  * Eso obliga a los teléfonos/computadoras que ya tienen la app instalada a
  * bajar los archivos nuevos en vez de seguir usando los viejos guardados.
  */
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v10";
 const CACHE_NAME = `cortafuego-hilti-${CACHE_VERSION}`;
 
 const ARCHIVOS_PRECACHE = [
