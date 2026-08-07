@@ -151,6 +151,17 @@ function longitudCintaPorVueltas(diamIn, nVueltas) {
 function computeRow(row, config) {
   const { C, D, E, F, G, H, I, J, K, L, M, N, O, P, MEM, PPINST, PPSIZE } = row;
   const out = {};
+  // Propagar campos de identificación al out — la normativa y la UI los necesitan
+  // desde las computed rows sin tener que cruzar con ROWS originales.
+  out._id = row._id;
+  out.P = P;
+  out.L = L;
+  out.M = M;
+  out.N = N;
+  out.A = row.A;
+  out.B = row.B;
+  // Propagar AJ_override al out para que sumIfAJ lo vea en las filas computadas
+  out.AJ_override = row.AJ_override || null;
 
   // AP: Espacio anular check
   const AP = (n(C) === 0) ? "-" : (n(I) === 0 ? 0 : "Otro");
@@ -260,8 +271,18 @@ function computeRow(row, config) {
     Q = "Revisar diámetro del cable!";
   } else if ((n(F) * n(G) + 2 * n(F) * n(H) + 2 * n(G) * n(H)) > 941.9336 && eq(L, TIPO_CAJA_UL)) {
     Q = hy(2);
-  } else if (eq(P, MAT_COLLARIN) && n(D) <= 2 && (eq(L, TIPO_TUB_COMB_AISL) || eq(L, TIPO_TUB_COMB))) {
+  } else if (eq(P, MAT_COLLARIN) && n(D) <= 2 && eq(L, TIPO_TUB_COMB)) {
+    // PVC sin aislar ≤2": el collarín no aplica, hay que usar Pasta u otro.
+    // Para PVC aislado y Cobre HVAC aislado el collarín sí aplica desde 1.5".
     Q = MSG_CAMBIAR_1;
+  } else if (eq(P, MAT_COLLARIN) && n(D) > 10) {
+    // Collarín no existe en talla >10" — aplica a todos los tipos de tubería.
+    Q = ERR_MATERIAL;
+  } else if (eq(L, TIPO_TUB_COBRE_HVAC) && eq(P, MAT_COLLARIN)) {
+    // Cobre HVAC aislado con collarín: aplica para cualquier diámetro hasta 10".
+    // La restricción >10" la maneja la rama MAT_COLLARIN && D>10 más abajo.
+    if (n(D) <= 7 / 8 && n(E) <= 1 / 2) Q = hy(1);
+    else Q = hy(2);
   } else if (eq(L, TIPO_TUB_COBRE_HVAC) && (eq(P, MAT_CINTA_CON) || eq(P, MAT_CINTA_SIN))) {
     if (n(D) <= 7 / 8 && n(E) <= 1 / 2) Q = hy(1);
     else Q = hy(2);
@@ -286,8 +307,6 @@ function computeRow(row, config) {
   } else if (eq(L, TIPO_TUB_COMB_AISL) && eq(N, "Concreto") && eq(P, MAT_PASTA) && (n(D) + 2 * n(E)) > 2) {
     Q = ERR_MATERIAL;
   } else if (eq(L, TIPO_TUB_COMB_AISL) && eq(N, "Panel de Yeso") && eq(P, MAT_PASTA) && (n(D) + 2 * n(E)) > 1.5) {
-    Q = ERR_MATERIAL;
-  } else if (eq(P, MAT_COLLARIN) && n(D) > 10) {
     Q = ERR_MATERIAL;
   } else if ((eq(L, TIPO_TUB_COMB) || eq(L, TIPO_TUB_COMB_AISL)) && (eq(P, MAT_CINTA_CON) || eq(P, MAT_CINTA_SIN))) {
     if (n(D) <= 4 && n(E) <= 1) Q = hy(1);
@@ -326,6 +345,10 @@ function computeRow(row, config) {
   const esParedGruesa = eq(M, "Pared") && T !== "-" && n(T) > 12.5;
   let aplicaLana = false;
   if ((eq(P, MAT_CINTA_CON) || eq(P, MAT_CINTA_SIN)) && n(I) !== 0) {
+    aplicaLana = true;
+  } else if (eq(P, MAT_COLLARIN) && n(I) !== 0 && neq(Qtext, ERR_MATERIAL) && Qtext !== MSG_CAMBIAR_1) {
+    // Collarín con espacio anular: el aislamiento del tubo requiere lana mineral
+    // para rellenar el espacio, igual que la pasta con espacio anular.
     aplicaLana = true;
   } else if (eq(P, MAT_PASTA) && neq(Qtext, ERR_MATERIAL)) {
     if (eq(L, TIPO_VACIO) || eq(L, TIPO_PASANTE_MULT) || eq(L, TIPO_BANDEJA)) aplicaLana = true;
@@ -578,18 +601,19 @@ function computeRow(row, config) {
   const AI = (eq(P, MAT_COLLARIN) && neq(Qtext, ERR_MATERIAL) && Qtext !== MSG_CAMBIAR_1) ? n(S) * n(C) : "-";
   out.AI = AI;
 
-  // AJ: referencia de tamaño de collarín
+  // AJ: referencia de tamaño de collarín — se elige según el OD total (D + 2×E),
+  // igual que la cinta: D es el diámetro de la tubería y E el espesor del aislamiento.
   let AJ;
   if (Qtext === ERR_MATERIAL) AJ = "-";
   else if (eq(P, MAT_COLLARIN)) {
-    const d = n(D);
-    if (d >= 1.4 && d < 2) AJ = "CP 643N 1.5";
-    else if (d >= 2 && d < 2.6) AJ = "CP 643N 2";
-    else if (d >= 2.6 && d < 3.6) AJ = "CP 643N 3";
-    else if (d >= 3.6 && d <= 4.5) AJ = "CP 643N 4";
-    else if (d >= 6 && d <= 6.6) AJ = "CP 643N 6";
-    else if (d >= 8 && d <= 8.8) AJ = "CP 644 8";
-    else if (d >= 10 && d <= 10.8) AJ = "CP 644 10";
+    const od = n(D) + 2 * n(E); // OD total = tubería + aislamiento a cada lado
+    if (od > 0 && od < 2.0) AJ = "CP 643N 1.5";
+    else if (od >= 2.0 && od <= 2.5) AJ = "CP 643N 2";
+    else if (od > 2.5 && od <= 3.5) AJ = "CP 643N 3";
+    else if (od > 3.5 && od <= 4.5) AJ = "CP 643N 4";
+    else if (od > 4.5 && od <= 6.625) AJ = "CP 643N 6";
+    else if (od > 6.625 && od <= 8.625) AJ = "CP 644 8";
+    else if (od > 8.625 && od <= 10.75) AJ = "CP 644 10";
     else AJ = "-";
   } else AJ = "-";
   out.AJ = AJ;
@@ -631,7 +655,12 @@ function sumFieldSi(rows, field, filtroFn) {
   return rows.reduce((acc, r) => acc + ((filtroFn(r) && r[field] !== "-" && !isBlank(r[field])) ? n(r[field]) : 0), 0);
 }
 function sumIfAJ(rows, code) {
-  return rows.reduce((acc, r) => acc + ((r.AJ === code && r.AI !== "-") ? n(r.AI) : 0), 0);
+  // Usa AJ_override si está definido (override manual de talla desde el Resumen),
+  // si no usa el AJ calculado automáticamente por el motor.
+  return rows.reduce((acc, r) => {
+    const talla = r.AJ_override || r.AJ;
+    return acc + ((talla === code && r.AI !== "-") ? n(r.AI) : 0);
+  }, 0);
 }
 
 function computeResumen(computedRows, waste, umbrales) {
@@ -698,7 +727,12 @@ function computeResumen(computedRows, waste, umbrales) {
   ];
   for (const [code, label, art] of collarSizes) {
     const qty = sumIfAJ(computedRows, code);
-    addItem("COLLARÍN", label, art, qty, 1, "Unidad");
+    // Los collarines se cuentan exactamente (sin factor de desperdicio) —
+    // son unidades discretas que se instalan 1:1 por penetrante.
+    if (qty > 0) {
+      const cant = roundup(qty, 0);
+      if (cant > 0) items.push({ tipo: "COLLARÍN", producto: label, codigo: art, presentacion: "Unidad", cantidad: cant, _collarCode: code });
+    }
   }
 
   // Putty pad
@@ -740,29 +774,56 @@ function computeResumen(computedRows, waste, umbrales) {
     if (r.A || r.B) entry.zonas.add(`${r.A || "-"}${r.B ? " · Nivel " + r.B : ""}`);
     else entry.zonas.add("-");
     if (n(r.X) > 0 || n(r.AL) > 0 || n(r.AN) > 0) entry.usaLana = true; // hubo espacio anular real en el proyecto
+    // Collarín con espacio anular: Y > 0 implica que se usa pasta + lana
+    if (r.P === MAT_COLLARIN && n(r.Y) > 0) entry.usaLana = true;
   }
   const normativas = Array.from(normaMap.values()).map(e => {
     const info = NORMA_APLICACION[e.norma];
-    let productoHilti = (info ? info.producto : "") || Array.from(e.materiales).join(", ");
-    const ficha = (info && info.producto) ? PRODUCTO_FICHAS[info.producto] : null;
-    const fichas = [];
-    if (ficha && ficha.nombre1) fichas.push({ nombre: ficha.nombre1, link: ficha.link1 });
-    if (ficha && ficha.nombre2) fichas.push({ nombre: ficha.nombre2, link: ficha.link2 });
+    // Si todos los materiales que usan este sistema UL son Collarín CP 643N/644,
+    // mostrar el producto y ficha del collarín aunque el texto de NORMA_APLICACION
+    // diga "Cinta CP648-E + Collar CP648-ER" (comparten el mismo sistema UL).
+    const soloCollar = e.materiales.size > 0 && Array.from(e.materiales).every(m => m === MAT_COLLARIN);
+    let productoHilti;
+    let fichas = [];
+    if (soloCollar) {
+      // Base: el collarín como producto principal
+      productoHilti = "Collarín CP643N o CP644";
+      const fichaCollar = PRODUCTO_FICHAS["Collarín CP643N o CP444"];
+      if (fichaCollar && fichaCollar.nombre1) fichas.push({ nombre: fichaCollar.nombre1, link: fichaCollar.link1 });
+      // Si hay espacio anular (usaLana), también se usa Pasta FS ONE MAX + Lana Mineral
+      if (e.usaLana) {
+        productoHilti += " + Pasta FS ONE MAX + Lana Mineral";
+        const fichaPasta = PRODUCTO_FICHAS["Pasta FS ONE MAX"];
+        if (fichaPasta && fichaPasta.link1 && !fichas.some(f => f.link === fichaPasta.link1))
+          fichas.push({ nombre: fichaPasta.nombre1, link: fichaPasta.link1 });
+        const fichaLana = PRODUCTO_FICHAS["Lana Mineral 4 pcf"];
+        if (fichaLana && fichaLana.link1 && !fichas.some(f => f.link === fichaLana.link1))
+          fichas.push({ nombre: fichaLana.nombre1, link: fichaLana.link1 });
+      }
+    } else {
+      productoHilti = (info ? info.producto : "") || Array.from(e.materiales).join(", ");
+      const ficha = (info && info.producto) ? PRODUCTO_FICHAS[info.producto] : null;
+      if (ficha && ficha.nombre1) fichas.push({ nombre: ficha.nombre1, link: ficha.link1 });
+      if (ficha && ficha.nombre2) fichas.push({ nombre: ficha.nombre2, link: ficha.link2 });
+    }
 
     // Verificar que todo material realmente seleccionado en el proyecto quede
     // reflejado en "Producto Hilti" — no solo el texto genérico de NORMA_APLICACION.
-    e.materiales.forEach(mat => {
-      const patron = FAMILIA_POR_MATERIAL[mat];
-      if (!patron) return; // materiales ya bien representados por el texto estático (cintas, manga, MSL...)
-      if (patron.test(productoHilti)) return; // ya está mencionado
-      productoHilti = productoHilti ? `${productoHilti} + ${mat}` : mat;
-      const claveFicha = FICHA_ALIAS[mat] || mat;
-      const fichaExtra = PRODUCTO_FICHAS[claveFicha];
-      if (fichaExtra) {
-        if (fichaExtra.nombre1 && !fichas.some(f => f.nombre === fichaExtra.nombre1)) fichas.push({ nombre: fichaExtra.nombre1, link: fichaExtra.link1 });
-        if (fichaExtra.nombre2 && !fichas.some(f => f.nombre === fichaExtra.nombre2)) fichas.push({ nombre: fichaExtra.nombre2, link: fichaExtra.link2 });
-      }
-    });
+    // Si ya es solo collarín, este bloque se omite (ya está bien manejado arriba).
+    if (!soloCollar) {
+      e.materiales.forEach(mat => {
+        const patron = FAMILIA_POR_MATERIAL[mat];
+        if (!patron) return; // materiales ya bien representados por el texto estático (cintas, manga, MSL...)
+        if (patron.test(productoHilti)) return; // ya está mencionado
+        productoHilti = productoHilti ? `${productoHilti} + ${mat}` : mat;
+        const claveFicha = FICHA_ALIAS[mat] || mat;
+        const fichaExtra = PRODUCTO_FICHAS[claveFicha];
+        if (fichaExtra) {
+          if (fichaExtra.nombre1 && !fichas.some(f => f.nombre === fichaExtra.nombre1)) fichas.push({ nombre: fichaExtra.nombre1, link: fichaExtra.link1 });
+          if (fichaExtra.nombre2 && !fichas.some(f => f.nombre === fichaExtra.nombre2)) fichas.push({ nombre: fichaExtra.nombre2, link: fichaExtra.link2 });
+        }
+      });
+    }
 
     // Si en el proyecto sí se usó lana mineral (espacio anular real) pero no quedó
     // mencionada, se agrega aparte (igual que con los demás materiales).
@@ -783,13 +844,65 @@ function computeResumen(computedRows, waste, umbrales) {
     };
   }).sort((a, b) => a.norma.localeCompare(b.norma));
 
-  // Conjunto de fichas técnicas distintas usadas en el proyecto (para descarga aparte)
+  // Conjunto de fichas técnicas distintas usadas en el proyecto (para descarga aparte).
+  // Se alimenta de dos fuentes:
+  //   1) Las fichas ya resueltas en cada normativa (ruta habitual).
+  //   2) Los ítems del resumen que tienen ficha en PRODUCTO_FICHAS pero que
+  //      quizás no aparecieron via normativa (collarines, cinta, mortero, etc.)
+  //      — garantiza que todo lo del cuadro de materiales tenga su ficha.
+  // Mapa tipo de ítem → clave en PRODUCTO_FICHAS (para tipos con una sola ficha)
+  const FICHA_POR_TIPO = {
+    "COLLARÍN": "Collarín CP643N o CP444",
+    "CINTA": 'Cinta CP648-E 1 3/4"',
+    "COLLAR": 'Cinta CP648-E 1 3/4" + Collar de retención CP 648-ER',
+    "MORTERO": "Mortero CP 637",
+    "ALMOHADILLA": "Almohadilla CFS-BL",
+    "ESPUMA": "Espuma CP 620",
+    "HOJA DE MASILLA": "Putty Pad CP 617",
+    "PASO DE CABLES": "Paso de cables CFS-MSL",
+    "MARCO DE PASO": "Paso de cables CFS-MSL",
+    "MANGA": 'Manga CP 653 4"',
+    "LANA": "Lana Mineral 4 pcf",
+  };
+  // Para PASTA y SELLADOR JUNTAS hay varios productos distintos — se mapea por producto
+  const FICHA_POR_PRODUCTO = {
+    "FS ONE MAX":  "Pasta FS ONE MAX",
+    "CP 606":      "Sellador CP 606",
+    "CFS SIL GG":  "Sellador CFS-S SIL GG",
+    "CFS SP WB":   "Sellador CFS SP WB",
+  };
   const fichasMap = new Map();
   normativas.forEach(nrm => {
     nrm.fichas.forEach(f => {
       if (f && f.link && !fichasMap.has(f.link)) fichasMap.set(f.link, { nombre: f.nombre, link: f.link });
     });
   });
+  // Agregar fichas de los ítems del resumen que no vinieron por normativa
+  items.forEach(it => {
+    // Buscar primero por tipo (collarín, cinta, lana, etc.)
+    const claveT = FICHA_POR_TIPO[it.tipo];
+    if (claveT) {
+      const fd = PRODUCTO_FICHAS[claveT];
+      if (fd) {
+        if (fd.link1 && !fichasMap.has(fd.link1)) fichasMap.set(fd.link1, { nombre: fd.nombre1, link: fd.link1 });
+        if (fd.link2 && fd.nombre2 && !fichasMap.has(fd.link2)) fichasMap.set(fd.link2, { nombre: fd.nombre2, link: fd.link2 });
+      }
+    }
+    // Buscar también por nombre de producto (pasta, selladores)
+    const claveP = FICHA_POR_PRODUCTO[it.producto];
+    if (claveP) {
+      const fd = PRODUCTO_FICHAS[claveP];
+      if (fd) {
+        if (fd.link1 && !fichasMap.has(fd.link1)) fichasMap.set(fd.link1, { nombre: fd.nombre1, link: fd.link1 });
+        if (fd.link2 && fd.nombre2 && !fichasMap.has(fd.link2)) fichasMap.set(fd.link2, { nombre: fd.nombre2, link: fd.link2 });
+      }
+    }
+  });
+  // Lana mineral — si aparece en ítems de materiales, garantizar su ficha
+  if (items.some(it => it.tipo === "LANA")) {
+    const fd = PRODUCTO_FICHAS["Lana Mineral 4 pcf"];
+    if (fd && fd.link1 && !fichasMap.has(fd.link1)) fichasMap.set(fd.link1, { nombre: fd.nombre1, link: fd.link1 });
+  }
   const fichasTecnicas = Array.from(fichasMap.values()).sort((a, b) => (a.nombre || "").localeCompare(b.nombre || ""));
 
   // Alertas: filas con mensajes de error/aviso

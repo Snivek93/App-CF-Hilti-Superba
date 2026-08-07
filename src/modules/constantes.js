@@ -58,7 +58,9 @@ const FAMILIA_POR_MATERIAL = {
   [MAT_ESPUMA]: /espuma|cp\s*620/i,
   [MAT_ALMOHADILLA]: /almohadilla|cfs-bl/i,
   [MAT_MORTERO]: /mortero/i,
-  [MAT_COLLARIN]: /collar[ií]n/i,
+  // Más específico: "Collarín" (con tilde) para no confundir con
+  // "Collar de retención CP 648-ER" que aparece en sistemas de cinta.
+  [MAT_COLLARIN]: /collar[ií]n\s+cp\s*64[34]/i,
   [MAT_PUTTY]: /putty/i,
 };
 // Alias entre el nombre interno del material y la clave real en PRODUCTO_FICHAS

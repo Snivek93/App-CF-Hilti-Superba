@@ -626,3 +626,8 @@ body.modo-levantamiento #levantamiento-fullscreen {
    ============================================================ */
 @media print { body { display: none !important; } }
 
+
+/* Botón de talla activo en el modal de collarín */
+.btn-collar-talla.active {
+  background: var(--hilti-red); color: white; border-color: var(--hilti-red);
+}

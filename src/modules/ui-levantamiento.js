@@ -84,7 +84,7 @@ const LEV = {
   espesorAislamiento: "", espesorAislamientoOtro: false,
   ocupacion: "",
   anular: 0.5, anularOtro: false,
-  barrera: "Pared", material: "Concreto", fRating: "1 Hora", membrana: false,
+  barrera: "Pared", material: "Panel de Yeso", fRating: "1 Hora", membrana: false,
   cantidad: 1, nota: "", puttySize: 7, puttyInst: "Fuera", materialMultiple: "Pasta FS ONE MAX",
   cajaPreset: "10x10x5",
   editandoId: null,
@@ -1263,11 +1263,18 @@ function agregarDesdeLevantamiento() {
 
   const fueEdicion = !!LEV.editandoId;
   // Reset solo lo que suele cambiar penetrante a penetrante; el resto queda pegado
-  LEV.tipo = null; LEV.diametro = ""; LEV.dimA = ""; LEV.dimB = ""; LEV.profCaja = ""; LEV.vacioModo = "dim"; LEV.diametroLibre = "";
+  // El tipo de penetrante se mantiene seleccionado para agilizar el ingreso
+  // de múltiples penetrantes del mismo tipo; solo se limpian los valores variables.
+  LEV.diametro = ""; LEV.dimA = ""; LEV.dimB = ""; LEV.profCaja = ""; LEV.vacioModo = "dim"; LEV.diametroLibre = "";
   LEV.espesorAislamiento = ""; LEV.espesorAislamientoOtro = false; LEV.ocupacion = ""; LEV.cantidad = 1; LEV.editandoId = null; LEV.nota = "";
 
   marcarCambio();
   renderLevantamiento();
+  // Scroll al inicio — el levantamiento corre en el div fullscreen
+  const levFs = document.getElementById("levantamiento-fullscreen");
+  if (levFs) levFs.scrollTop = 0;
+  const levContent = document.getElementById("levantamiento-content");
+  if (levContent) levContent.scrollTop = 0;
   mostrarToast(fueEdicion ? "Cambios guardados." : `Agregado: ${nueva.C}x ${nueva.L}`);
 }
 
