@@ -10,7 +10,7 @@
  * Eso obliga a los teléfonos/computadoras que ya tienen la app instalada a
  * bajar los archivos nuevos en vez de seguir usando los viejos guardados.
  */
-const CACHE_VERSION = "v10";
+const CACHE_VERSION = "v11";
 const CACHE_NAME = `cortafuego-hilti-${CACHE_VERSION}`;
 
 const ARCHIVOS_PRECACHE = [
@@ -30,7 +30,10 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
-// Activar: borra cachés de versiones anteriores.
+// Activar: borra cachés de versiones anteriores y notifica a todos los
+// clientes abiertos para que recarguen y vean la versión nueva de inmediato
+// (en combinación con self.skipWaiting() arriba, que hace que el SW nuevo
+// tome control sin esperar a que se cierren las pestañas).
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((nombres) =>
@@ -39,9 +42,15 @@ self.addEventListener("activate", (event) => {
           .filter((nombre) => nombre !== CACHE_NAME)
           .map((nombre) => caches.delete(nombre))
       )
-    )
+    ).then(() => {
+      self.clients.claim();
+      // Avisa a todas las pestañas/ventanas abiertas que hay una versión
+      // nueva lista — la app escucha este mensaje y recarga.
+      return self.clients.matchAll({ type: "window" }).then((clientes) => {
+        clientes.forEach((cliente) => cliente.postMessage({ tipo: "SW_ACTUALIZADO", version: CACHE_VERSION }));
+      });
+    })
   );
-  self.clients.claim();
 });
 
 // Peticiones: responde primero con lo guardado (rápido, funciona offline),

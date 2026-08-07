@@ -9196,13 +9196,16 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
   window.addEventListener("load", () => {
     navigator.serviceWorker.register("sw.js").catch(() => {});
   });
-  // Cuando el Service Worker nuevo toma control (después de una actualización),
-  // recargar una sola vez para que el usuario vea la versión nueva.
+  // Cuando el Service Worker nuevo manda el mensaje SW_ACTUALIZADO (lo hace
+  // después de activarse y reclamar control), recargamos una sola vez para
+  // que el usuario vea la versión nueva de inmediato, sin tener que cerrar
+  // y volver a abrir la app.
   let yaRecargo = false;
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if (yaRecargo) return;
-    yaRecargo = true;
-    location.reload();
+  navigator.serviceWorker.addEventListener("message", (event) => {
+    if (event.data && event.data.tipo === "SW_ACTUALIZADO" && !yaRecargo) {
+      yaRecargo = true;
+      location.reload();
+    }
   });
 }
 </script>
